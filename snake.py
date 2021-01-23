@@ -1,8 +1,11 @@
 import pygame
 import random
 import numpy as np
+from PIL import Image
+# import tensorflow as tf
+
 pygame.init()
-""""includes gamescore"""
+
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -31,11 +34,13 @@ class game:
         self.x1 = random.randint(0,self.board.get_width() / 10 - 1) * 10
         self.y1 = random.randint(0,self.board.get_height() / 10 - 1) * 10
         
-            
+        # self.model = set_model(w, h)
+
         self.played = False
         self.snakelst = []
         x_srart = random.randint(0,self.dis_width / 10 - 1) * 10
         y_start = random.randint(0,self.dis_height / 10 - 1) * 10
+        
         self.addsnake((x_srart,y_start), blue)
         self.game_over = False
         self.cp = (0,0)
@@ -131,7 +136,11 @@ class game:
                         self.cp = (self.x1_change,self.y1_change)
                         self.movesnake()
                         self.drawsnake()
-                    
+                #? captures gamestate as w * h imagwe after every turn
+                pygame.image.save(self.board, 'cp.png')
+                print(dir(self.board))
+                ia = Image.open('cp.png')
+                ia = pass_to_model(ia)
 
                 self.played = True
                 for i in range(1,len(self.snakelst)):
@@ -158,9 +167,31 @@ class game:
 
 
 class snake:
-    def __init__(self, p, color):
+    def __init__(self, p, color, model=None):
         self.p = p
         self.color = color
+        self.model = model
+
+def pass_to_model(img):
+    img_arr = np.asarray(img)
+    return img_arr / 255.0
+
+def set_model(w, h):
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Flatten(input_shape=(300, 200)),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.Dense(4)
+        ])
+    
+    model.compile(optimizer='adam',
+            loss=loss_fn,
+            metrics=['accuracy'])
+    probability_model = tf.keras.Sequential([
+        model,
+        tf.keras.layers.Softmax()
+        ])
+    return probability_model
 
 a = game()
 pygame.quit()
