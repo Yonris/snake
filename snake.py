@@ -178,7 +178,7 @@ def pass_to_model(img):
 	img_arr = np.expand_dims(img_arr, axis=0)
 
 	return img_arr
-
+#### we need to change the output (first param) of the Conv2D layer
 def set_model(w, h):
 	model = tf.keras.models.Sequential([
 		tf.keras.layers.Conv2D(1, (3,3), activation='relu', input_shape=(200, 300, 3)),
